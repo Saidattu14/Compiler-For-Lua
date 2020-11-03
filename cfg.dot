@@ -1,0 +1,3 @@
+digraph structs {
+blk0 [label="_t0 \<\- 1 / 7\n \<\- x = _t0\n_t2 \<\- 10 + x\n_t1 \<\- _t2 * 2\n \<\- y = _t1\n_t4 \<\- x * x\n_t3 \<\- y - _t4\n \<\- z = _t3\n \<\- print t x\n \<\- print t y\n \<\- print t z\n_t5 \<\- z * z\n \<\- z = _t5\n \<\- print t z\n"];
+}
