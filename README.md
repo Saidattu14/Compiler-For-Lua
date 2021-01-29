@@ -8,3 +8,11 @@ To install flex run command sudo apt-get install flex
 Bison is a general-purpose parser generator that converts a grammar description (Bison Grammar Files) for an LALR(1) context-free grammar into a C program to parse that grammar. The Bison parser is a bottom-up parser. It tries, by shifts and reductions, to reduce the entire input down to a single grouping whose symbol is the grammar's start-symbol.
 
 To install bison run command sudo apt-get install bison
+
+# Makefile
+
+To install Make run command sudo apt install make
+
+# CPP compiler
+
+To install CPP run command sudo apt install g++
