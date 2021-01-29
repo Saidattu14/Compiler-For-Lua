@@ -16,3 +16,14 @@ To install Make run command sudo apt install make
 # CPP compiler
 
 To install CPP run command sudo apt install g++
+
+# TO clean
+
+run command make clean
+
+# To test the compiler
+
+run make clean
+run make
+run ./test.lua the code of the lua language is converted into c program and presented in target.cc file
+
