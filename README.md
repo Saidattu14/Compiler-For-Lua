@@ -24,6 +24,10 @@ run command make clean
 # To test the compiler
 
 run make clean
+
+
 run make
+
+
 run ./test.lua the code of the lua language is converted into c program and presented in target.cc file
 
