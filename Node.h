@@ -1,5 +1,6 @@
 #ifndef NODE_H
 #define NODE_H
+
 #include <iostream>
 #include <string>
 #include <list>
@@ -8,6 +9,7 @@
 #include <bits/stdc++.h>
 #include "Environment.h"
 #include "labtrees.cc"
+#
 using namespace std;
 static int id = 0;
 
@@ -20,7 +22,7 @@ public:
   std::list<Node> children;
   int count1 = 0;
   int depth1 = 0;
-  vector<string> d[10000];
+  vector<string> d[10];
   Node(std::string t, std::string d) : tag(t), value(d) {}
   Node(std::string t) : tag(t), value("") {}
   Node()
@@ -217,9 +219,10 @@ public:
   Statement *handleStatement(Node &n)
   {
     Seq *temp = new Seq();
+    int count = 0;
     for (auto &i : children)
     {
-      // cout << n.tag << " ";
+      
       if (i.tag == "Chunk")
       {
         // n.tag = i.tag;
@@ -257,20 +260,85 @@ public:
       else if (i.tag == "FUNCTION")
       {
         n.tag = i.tag;
-        temp->statements.push_back(i.handle_function(n, i.value));
+        for(auto &i1 : children)
+        {
+          count++;
+          temp->statements.push_back(handle_Function_Function_Call(i1));
+          break;
+        }
+        // temp->statements.push_back(i.handle_function(i, i.value));
+       break;
       }
       else if (i.tag == "Return")
       {
         temp->statements.push_back(i.handle_return(n));
       }
     }
+  
     return temp;
   }
+  Statement *handle_Function_Function_Call(Node &n)
+  {
+    Seq *temp = new Seq();
+    int count = 0;
+   
+    for(auto i1 = children.begin(); i1 != children.end(); i1++)
+    {
+     
+      auto var = (*i1).handle_function((*i1),((*i1).value));
+      i1++;
+      Statement *var1;
+      var1 = handle_fun(n);
+      temp->statements.push_back(new Function_data(var, var1));
+      
+            // temp->statements.push_back(new Function_data(handle_function((*i1),((*i1).value)), handleStatement(*i1)));
+    //  temp->statements.push_back(i.handle_function(i, i.value));
+    break;
+    }
+    
+     return temp;
+  }
+  Statement *handle_fun(Node &n)
+  {
+    Seq *temp = new Seq();
+    int count = 0;
+    Statement *var1;
+    for(auto i1 = children.begin(); i1 != children.end(); i1++)
+    {
+     count++;
+     if(count > 1)
+     {
+       Statement *var1;
+       if((*i1).tag == "FunctionCall")
+       {
+         var1 = (*i1).handleFunctionCall(*i1);
+          
+       }
+      else if((*i1).tag  == "For loop")
+      {
+       var1 = (*i1).handle_for_loop(*i1);
+      
+      }
+      else if((*i1).tag == "IF")
+      {
+        var1 = (*i1).handle_if(n);
+      }
+      temp->statements.push_back(var1);
+      
+     }
+     
+    }
+    return temp;
+  }
+
+
+
   Statement *handleEquals(Node &n)
   {
     Seq *temp = new Seq();
     for (auto i = children.begin(); i != children.end(); i++)
     {
+     
       if ((*i).tag == "Variable")
       {
         string var = (*i).value;
@@ -282,7 +350,7 @@ public:
         }
         else if ((*i).tag == "FunctionCall")
         {
-          temp->statements.push_back((*i).handleFunctionCall(n));
+          temp->statements.push_back((*i).handleFunctionCall1(n,var));
         }
         else if ((*i).tag == "Tableconstructor")
         {
@@ -351,11 +419,16 @@ public:
   Statement *handle_function(Node &n, string &name)
   {
     Seq *temp = new Seq();
-    string function_name = name;
+    string function_name = name;  
     for (auto i = children.begin(); i != children.end(); i++)
     {
+
+   
+    
       temp->statements.push_back((*i).handle_function_body((*i), function_name));
+    
     }
+    
     return temp;
   }
   Statement *handle_function_body(Node &n, string name)
@@ -378,7 +451,6 @@ public:
     }
     return temp;
   }
-
   Expression *handle_var_list(Node &n)
   {
     for (auto i = children.begin(); i != children.end(); i++)
@@ -397,7 +469,8 @@ public:
         auto index = new Equality(handle_expressions((*i)), new Constant(0));
         auto index2 = new Equality(new Constant(0), handle_expressions(*i));
         auto index1 = new Array(new Constant(var), index);
-        temp->statements.push_back(new List(index1, index2));
+        auto dt = new Constant(var);
+        temp->statements.push_back(new List(index1, index2, dt));
       }
       else if ((*i).tag == "Expressionlist")
       {
@@ -418,7 +491,8 @@ public:
         auto index = new Equality(handle_expressions((*i)), new Constant(count));
         auto index2 = new Equality(new Constant(0), handle_expressions(*i));
         auto index1 = new Array(new Constant(var), index);
-        temp->statements.push_back(new List(index1, index2));
+        auto dt = new Constant(var);
+        temp->statements.push_back(new List(index, index2,dt));
         count++;
       }
       else if ((*i).tag == "FunctionCall")
@@ -474,10 +548,11 @@ public:
     }
     return temp;
   }
-
-  Statement *handleFunctionCall(Node &n)
+   Statement *handleFunctionCall1(Node &n, string val)
   {
+    
     Seq *temp = new Seq();
+   
     for (auto &i : children)
     {
       if (i.value == "print" && i.tag == "Variable")
@@ -488,7 +563,8 @@ public:
       else if (i.tag == "Variable" && i.value == "io")
       {
         n.tag = i.tag;
-        temp->statements.push_back(i.handle_write_read(n));
+        
+        temp->statements.push_back(i.handle_write_read(n,val));
       }
       else if (i.tag == "Variable")
       {
@@ -496,6 +572,36 @@ public:
         n.tag = i.tag;
         temp->statements.push_back(new Exp_call(name, i.handle_exp_call(n)));
       }
+      
+    }
+    return temp;
+  }
+
+  Statement *handleFunctionCall(Node &n)
+  {
+    
+    Seq *temp = new Seq();
+   
+    for (auto &i : children)
+    {
+      if (i.value == "print" && i.tag == "Variable")
+      {
+        n.tag = i.tag;
+        temp->statements.push_back(i.handleprint(n));
+      }
+      else if (i.tag == "Variable" && i.value == "io")
+      {
+        n.tag = i.tag;
+        string var = " ";
+        temp->statements.push_back(i.handle_write_read(n,var));
+      }
+      else if (i.tag == "Variable")
+      {
+        auto name = new Constant(i.value);
+        n.tag = i.tag;
+        temp->statements.push_back(new Exp_call(name, i.handle_exp_call(n)));
+      }
+      
     }
     return temp;
   }
@@ -503,7 +609,7 @@ public:
   {
     for (auto i = children.begin(); i != children.end(); i++)
     {
-      if ((*i).tag == "MINUS" || (*i).tag == "PLUS")
+      if ((*i).tag == "MINUS" || (*i).tag == "PLUS" || (*i).tag == "NAME")
       {
         n.tag = (*i).tag;
         return (*i).handle_expressions((*i));
@@ -511,7 +617,18 @@ public:
     }
     return new Constant("");
   }
-  Statement *handle_write_read(Node &n)
+  Expression *handle_in(Node &n)
+  {
+     if  (n.tag == "STRING")
+      {
+        string y = "STRING"+ n.value;
+         auto var1 = new Input(handle_expressions((n)));
+         return var1;
+       
+      }
+    return new Constant("");
+  }
+  Statement *handle_write_read(Node &n,string var)
   {
     Seq *temp = new Seq();
     for (auto i = children.begin(); i != children.end(); i++)
@@ -533,7 +650,9 @@ public:
       else if ((*i).tag == "NAME" && (*i).value == "read")
       {
         i++;
-        return new Input(handle_expressions((*i)));
+       
+        temp->statements.push_back(new Assignment(var, handle_in(*i)));
+        
       }
       else
       {
@@ -612,6 +731,11 @@ public:
       {
         string x = n.value;
         return new Constant(x);
+      }
+      else if  (n.tag == "STRING")
+      {
+        string y = "STRING"+ n.value;
+        return new Constant(y);
       }
       return new Constant(n.value);
     }
