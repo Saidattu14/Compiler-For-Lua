@@ -52,51 +52,95 @@ void generateCFGDotFile(BBlock *start)
 }
 void generatetargetFile(BBlock *start)
 {
-  // string dotNodeStr = "", dotNodeConStr = "";
-  // set<string> s;
-  // int val = 0;
-  // set<string> s1;
-  // start->TargetFile(dotNodeStr, dotNodeConStr, s);
-  // for (auto i = s.begin(); i != s.end(); i++)
-  // {
-  //   string a = (*i);
-  //   int val = 0;
-  //   for (auto i = 0; i < a.length(); i++)
-  //   {
-  //     if (isdigit(a[i]) == false)
-  //     {
-  //       val = 1;
-  //     }
-  //   }
-  //   if (val == 1)
-  //   {
-  //     s1.insert((*i));
-  //   }
-  // }
-  // string d = "";
-  // for (auto i = s1.begin(); i != s1.end(); i++)
-  // {
-  //   if ((*i) != "print")
-  //   {
-  //     d += " int " + (*i) + ";\n";
-  //   }
-  // }
-  // ofstream file("target.cc", ios::trunc);
-  // if (file.is_open())
-  // {
-  //   file << "#include<stdio.h>\n #include<math.h>\n";
-  //   file << "int main(){\n";
-  //   file << d;
-  //   file << dotNodeStr;
-  //   file << dotNodeConStr;
-  //   file << " return 0;\n";
-  //   file << "}";
-  //   file.close();
-  // }
-  // else
-  // {
-  //   cout << "Unable to open file\n";
-  // }
+  string dotNodeStr = "", dotNodeConStr = "";
+  set<string> s;
+  int val = 0;
+  set<string> s1;
+  set<string> a1;
+  start->TargetFile(dotNodeStr, dotNodeConStr, s,a1,val);
+  for (auto i = s.begin(); i != s.end(); i++)
+  {
+    string a = (*i);
+    int val = 0;
+    for (auto i = 0; i < a.length(); i++)
+    {
+      if (isdigit(a[i]) == false)
+      {
+        val = 1;
+      }
+    }
+    if (val == 1)
+    {
+      s1.insert((*i));
+    }
+  }
+  string d = "";
+  set<string> s5;
+  for (auto i = s1.begin(); i != s1.end(); i++)
+  {
+    string x = (*i);
+    string x1 = "#";
+    int c = 0;
+    for (auto i2 = s5.begin(); i2 != s5.end(); i2++)
+    {
+      string x = (*i);
+      string y = (*i2);
+      for(auto i1 = 1; i1<y.length();i1++)
+      {
+          
+          if(x[i1-1] != y[i1])
+          {
+            c++;
+          }
+         
+      }
+      if(c > 0)
+      {
+        c = 0;
+      }
+      else{
+        c = 1;
+      }
+   
+      
+    }
+  
+    if ((*i) != "print" && c == 0)
+    {
+      if(x[0] != x1[0])
+      {
+         d += " int " + (*i) + ";\n";
+      }
+      else
+      {
+        string y = (*i);
+        string y1 = " ";
+                for(auto i1 = 1; i1< y.length();i1++)
+                {
+                    y1 = y1 + y[i1];
+                }
+                d += "vector<int> " + y1 + ";\n";
+                s5.insert(y1);
+                s1.erase(y1);
+      }
+    }
+}
+  ofstream file("target.cc", ios::trunc);
+  if (file.is_open())
+  {
+    file << "#include<stdio.h>\n#include<math.h>\n#include<iostream>\n#include <vector>\n#include <bits/stdc++.h>\nusing namespace std;\n";
+    file << dotNodeConStr;
+    file << "int main(){\n";
+    file << d;
+    file << dotNodeStr;
+    file << " return 0;\n";
+    file << "}";
+    file.close();
+  }
+  else
+  {
+    cout << "Unable to open file\n";
+  }
 }
 
 int main(int argc, char *argv[])
