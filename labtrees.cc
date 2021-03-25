@@ -35,7 +35,7 @@ public:
     }
     string toStr()
     {
-        return (name + " \\<\\- " + lhs + " " + op + " " + rhs);
+        return (name + "<-" + lhs + " " + op + " " + rhs);
     }
 };
 
@@ -76,6 +76,7 @@ public:
         nodeStr += "\"];\n";
         //std::cout << nodeStr;
 
+//true condition
         if (tExit != NULL)
         {
             string temp = name + " -> " + tExit->name + " [label=\"true\"];\n";
@@ -101,6 +102,7 @@ public:
     string Var_dic(set<string>s)
     {
         int val = 0;
+        //
      set<string> s1;
         for (auto i = s.begin(); i != s.end(); i++)
         {
@@ -130,18 +132,44 @@ public:
         return d;
 
     }
-    void TargetFile(string &nodeStr, string &conStr, set<string> &s, set<string> &s1,int else_dt)
+     void TargetFile(string &nodeStr, string &conStr, set<string> &s, set<string> &s1,int else_dt)
     {
+      
         int _if_count = 0;
         int data = 0;
         int val = 0;
+        int res = 0;
          for (auto i = instructions.begin(); i != instructions.end(); i++)
         {
+            if((*i).name == "end")
+            {
+                if(else_dt == 100)
+                {
+                    res = 0;
+                }
+                else if(else_dt == 50)
+                {
+                    nodeStr += "\n";
+                    nodeStr += "}";
+                    res = 0;
+                }
+                else
+                {
+                     res = 1;
+                }
+              
+            }
+            else
+            {
+                res = 0;
+            }
             val++;
         }
+        if(res == 0)
+        {
         for (auto i = instructions.begin(); i != instructions.end(); i++)
         {
-            data++;
+            data = 100;
             // cout << (*i).rhs << "rhs   " << (*i).op << " op   "
             //      << (*i).lhs << "  lhs    "
             //      << (*i).name << "   name  \n"
@@ -157,7 +185,7 @@ public:
             s.insert((*i).name);
             s.insert((*i).lhs);
             }
-            if ((*i).lhs == "print")
+            if ((*i).name == "print")
             {
                 string var = (*i).rhs;
                 string var1 = "STRING";
@@ -208,7 +236,7 @@ public:
                 nodeStr += "\n";
 
             }
-            else if (o == "+" || o == "-" || o == "*" || o == "/")
+            else if (o == "+" || o == "-" || o == "*" || o == "/" || o == "%")
             {
                 string a = (*i).name + " = " + (*i).lhs + "  " + (*i).op + " " + (*i).rhs + ";\n";
                 nodeStr += a;
@@ -226,12 +254,12 @@ public:
                     }
                     y = y + ".size()";
                     (*i).rhs = y;
-                     string a = (*i).lhs + "=" + y + ";\n";
+                     string a = (*i).name + "=" + y + ";\n";
                 nodeStr += a;
                 }
                 else
                 {
-                string a = (*i).lhs + "=" + (*i).rhs + ";\n";
+                string a = (*i).name + "=" + (*i).rhs + ";\n";
                 nodeStr += a;
                 }
             }
@@ -277,84 +305,115 @@ public:
                 nodeStr += "\n";
 
             }
+             else if(n == "end")
+            {
+               
+                data = 0;
+                nodeStr += "\n";
+                nodeStr += "}";
+                break;
+            }
+            else if(o == "<")
+            {
+                 string a = "if( " + l  + o + r + "){ " ;
+                  a += "\n";
+                 a = a + n + " =  0 ;  " ;
+                   a += "\n";
+                  nodeStr += a;
+                nodeStr += "}";
+                a = "else{ " +  n + " = 1;";
+                 a += "\n";
+                  nodeStr += a;
+                nodeStr += "}";
+            }
+        
             else if(n == "If")
             {
-                s.erase(n);
-                int c = 0;
-                (*i++);
-                _if_count = 0;
-                 for (auto i1 = instructions.begin(); i1 != instructions.end(); i1++)
-                 {
-                     _if_count += 1;
-                     string n = (*i1).name;
-                     if(_if_count != 1 && n != "If")
-                     {
-                     
-                     s.insert((*i1).rhs);
-                    s.insert((*i1).name);
-                    s.insert((*i1).lhs);
-                     
-                     if(_if_count == instructions.size())
-                     {
-                         string k ;
-                         k = (*i1).op;
-                         string k1 = "E";
-                        if(k == k1)
-                         {
-                             string v = "==";
-                             k =  v;
-                         }
-                        string b =  "if( " + (*i1).lhs + "  " + k + " " + (*i1).rhs + ")\n";
-                        nodeStr += b;
-                     }
-                     else if( _if_count != 1)
-                     {
-                          o = (*i1).op;
-                         if(o == "E")
-                         {
-                             o = "==";
-                         }
-                          if(o == "A")
-                            {
-                
-                            string a = (*i1).name + "=" + (*i1).lhs + "[" +  (*i1).rhs + "]"+   ";\n";
-                            nodeStr += a;
-                             }
-                        else 
-                        {
-                          string a = (*i1).name + " = " + (*i1).lhs + "  " + o + " " + (*i1).rhs + ";\n";
-                          nodeStr += a;
-                        }
-                     }
-                     }
-                     
-                 }
                
+                
+                if(val == 2)
+                {
+                    else_dt = 100;
+                    for (auto i1 = instructions.begin(); i1 != instructions.end(); i1++)
+                    {
+                         s.insert((*i1).rhs);
+                        s.insert((*i1).name);
+                        s.insert((*i1).lhs);
+
+                         string k ;
+                          k = (*i1).op;
+                         string k1 = "L";
+                        if(k == k1)
+                        {
+                            string x = (*i1).rhs;
+                            string y = " ";
+                            string z = "#";
+                            if(x[0] == z[0])
+                            {
+                                for (auto i3 = 1; i3<x.length(); i3++)
+                                {
+                                y = y + x[i3];
+                                }
+                                y = y + ".size()";
+                                (*i1).rhs = y;
+                                
+                            }
+                            string a = "for( ; " + (*i1).lhs + "<=" + (*i1).rhs + ";)";
+                            nodeStr += a;
+                            nodeStr += "\n";
+                            nodeStr += "{";
+                            
+                        }
+                        
+                        break;
+                    }
+
+                    
+                }
+                else
+                {
+                    string a = "if( !" + l  + ")";
+                    nodeStr += a;
+                    nodeStr += "\n";
+                    nodeStr += "{";
+                    if(fExit == NULL)
+                    {
+                        else_dt = 100;
+                    }
+                    else
+                    { 
+                        else_dt = 0;
+                    }
+
                 if(tExit != NULL)
                 {
                    
-                     nodeStr += "{";
-                     nodeStr += "\n";
+                    
                     tExit->TargetFile(nodeStr, conStr, s,s1,else_dt);
-                     nodeStr += "}";
                      nodeStr += "\n";
+                    nodeStr += "}";
                      tExit = NULL;
                      data = 0;
                 }
                 if(fExit != NULL)
                 {
+                    else_dt = 50;
                     nodeStr += "else {";
                      nodeStr += "\n";
-                    fExit->TargetFile(nodeStr, conStr, s,s1,1);
-                   
+                    fExit->TargetFile(nodeStr, conStr, s,s1,50);
                     fExit = NULL;
                     data = 0;
                 }
+                }
+                
+               
+               
                 
                 break;
              
             }
-            else if(o == "F")
+        
+            else if(o == "l")
             {
                 string a =  "int  " + (*i).lhs + "( int " +  (*i).rhs + ")";
                 conStr +=  a;
@@ -373,66 +432,31 @@ public:
                      conStr += "} \n";
                     nodeStr = " ";
                     tExit = NULL;
+                    
                 }
                 if (fExit != NULL)
                 {
                     fExit->TargetFile(nodeStr, conStr, s,s1,else_dt);
+                    conStr += "} \n";
                      fExit = NULL;
                 }
-                data = 0;
+                data = data+1;
+                val =0;
                 break;
             }
             else if (o == "R")
             {
-                 string a =  "return( "  + (*i).lhs + ");\n";
+
+                string a =  "return( "  + (*i).lhs + ");\n";
                 nodeStr += a;
             }
-            else if (n == "for")
-            {
-                 s.erase(n);
-                (*i++);
-                string a = "for( " + (*i).lhs + "=" + (*i).rhs + ";";
-                (*i++);
-                string x = (*i).rhs;
-                string y = " ";
-                string z = "#";
-                if(x[0] == z[0])
-                {
-                    for (auto i3 = 1; i3<x.length(); i3++)
-                    {
-                    y = y + x[i3];
-                    }
-                    y = y + ".size()";
-                    (*i).rhs = y;
-                }
-                string b = (*i).lhs + "<=" + (*i).rhs + ";" + (*i).lhs + "++)\n";
-                nodeStr += a + b;
-               
-                if (tExit != NULL)
-                {
-                     nodeStr += "{";
-                     nodeStr += "\n";
-                    tExit->TargetFile(nodeStr, conStr, s,s1,else_dt);
-                     nodeStr += "}";
-                     nodeStr += "\n";
-                      tExit = NULL;
-                       
-                }
-                if (fExit != NULL)
-                {
-                    fExit->TargetFile(nodeStr, conStr, s,s1,else_dt);
-                     fExit = NULL;
-                     
-                }
-                data = 0;
-                break;
-                
-            }
+            
             else if(o == "E")
             {
-                string a = n + "=" + (*i).rhs + ";\n";
+                string a = n + "=" + (*i).lhs + ";\n";
                 nodeStr += a;
             }
+        
             else if(o == "V")
             {
                 s.erase((*i).lhs);
@@ -440,11 +464,8 @@ public:
                 string a = (*i).name + "=" + (*i).lhs + "(" +  (*i).rhs + ")"+   ";\n";
                 nodeStr += a;
             }
-            else if(o == "L")
-            {
-                string a = n + ".push_back("  +(*i).rhs +");\n";
-                nodeStr += a;
-            }
+        
+            
                             else if(o == "A")
                             {
                 
@@ -454,10 +475,11 @@ public:
             
             else if(n== "do")
             {
-                 s.erase(n);
+                s.erase(n);
                 string x = "do";
                 string a = x  + "{ \n";
                 nodeStr += a;
+
                
             }
             else if(n == "while")
@@ -467,35 +489,27 @@ public:
                 nodeStr += a;
                 (*i++);
                 string b = "while( " + (*i).lhs + "==" + (*i).rhs + ");\n";
-                 nodeStr += b;
+                nodeStr += b;
+                fExit = NULL;
             }
         
             
             
         }
-                if(else_dt == 1 && val != 0)
-               {
-                   nodeStr += "}";
-                     nodeStr += "\n";
-                     else_dt = 0;
-               }
-                 if (tExit != NULL )
+        }
+       
+        
+                 if (tExit != NULL && data == 100 && else_dt != 1)
                 {
-                    if(data == 0)
-                    {
-                         nodeStr += "}";
-                    }
-                    if(data == 10)
-                    {
-                        nodeStr += "}";
-                    }
-                   
+                    
                     nodeStr += "\n";
                     tExit->TargetFile(nodeStr, conStr, s,s1,else_dt);
+                 
                     
                 }
-                if (fExit != NULL)
+                if (fExit != NULL )
                 {
+                    nodeStr += "\n";
                     fExit->TargetFile(nodeStr, conStr, s,s1,else_dt);
                 }
 
@@ -798,7 +812,7 @@ public:
         name = makeNames();
         string lhs_name = lhs->convert(out);
         string rhs_name = rhs->convert(out);
-        ThreeAd instruction = ThreeAd(name, '>=', lhs_name, rhs_name);
+        ThreeAd instruction = ThreeAd(name, 'E', lhs_name, rhs_name);
         out->instructions.push_back(instruction);
         return name;
     }
@@ -1052,8 +1066,7 @@ public:
     BBlock *convert(BBlock *out)
     {
         string temp = exp->convert(out);
-        string temp1 = "print";
-        ThreeAd instruction = ThreeAd(name, 'print', temp1, temp);
+        ThreeAd instruction = ThreeAd("print", 't', temp, temp);
         out->instructions.push_back(instruction);
         return out;
     }
@@ -1080,7 +1093,36 @@ public:
         name = makeNames();
         string lhs_name = lhs->convert(out);
         string rhs_name = rhs->convert(out);
-        ThreeAd instruction = ThreeAd(name, '=', lhs_name, rhs_name);
+        ThreeAd instruction = ThreeAd(lhs_name,'=',rhs_name,rhs_name);
+        out->instructions.push_back(instruction);
+        return out;
+    }
+    void dump(int depth = 0)
+    {
+        for (int i = 0; i < depth; i++)
+            cout << " ";
+        cout << "==" << endl;
+        lhs->dump(depth + 1);
+        rhs->dump(depth + 1);
+    }
+};
+class Equal : public Statement
+{
+public:
+    Expression *lhs;
+    Variable *rhs;
+
+    Equal(Expression *lhs, string rhs) : lhs(lhs), rhs(new Variable(rhs))
+    {
+    }
+
+    BBlock *convert(BBlock *out)
+    {
+        // Write three address instructions into the block
+        name = makeNames();
+        string lhs_name = lhs->convert(out);
+        string rhs_name = rhs->convert(out);
+        ThreeAd instruction = ThreeAd(lhs_name,'=',rhs_name,rhs_name);
         out->instructions.push_back(instruction);
         return out;
     }
@@ -1141,7 +1183,7 @@ public:
         // Write three address instructions into the block
         string lhs_name = lhs->convert(out);
         string rhs_name = rhs->convert(out);
-        ThreeAd instruction = ThreeAd(name, '=', lhs_name, rhs_name);
+        ThreeAd instruction = ThreeAd( lhs_name,'=', rhs_name, rhs_name);
         out->instructions.push_back(instruction);
         return out;
     }
@@ -1154,6 +1196,7 @@ public:
         rhs->dump(depth + 1);
     }
 };
+
 
 class Exp_call : public Statement
 {
@@ -1200,7 +1243,7 @@ public:
         // Write three address instructions into the block
         string lhs_name = lhs->convert(out);
         string rhs_name = rhs->convert(out);
-        ThreeAd instruction = ThreeAd(name, 'F', lhs_name, rhs_name);
+        ThreeAd instruction = ThreeAd(name, 'call', lhs_name, rhs_name);
         out->instructions.push_back(instruction);
         BBlock *Continue = new BBlock;
         BBlock *Continue1 = new BBlock;
@@ -1266,15 +1309,19 @@ public:
     BBlock *convert(BBlock *out)
     {
         // Write three address instructions into the block
-        ThreeAd instruction = ThreeAd("If", 'a', "", "");
-        out->instructions.push_back(instruction);
-        condition->convert(out);
+        
+        BBlock *temp = new BBlock();
+        BBlock *temp1 = new BBlock();
+        out->tExit = temp;
+        ThreeAd instruction = ThreeAd("If",' ', condition->convert(out), " ");
+        temp->instructions.push_back(instruction);
         BBlock *joinBlock = new BBlock();
         BBlock *tExit1 = new BBlock();
         BBlock *fExit1 = elseStatement ? new BBlock() : joinBlock;
-        out->fExit = fExit1;
-        out->tExit = tExit1;
-        tExit1 = ifStatement->convert(tExit1);
+        temp->fExit = fExit1;
+        temp->tExit = temp1;
+        ifStatement->convert(temp1);
+        temp1->tExit = joinBlock;
         
         if (elseStatement)
         {
@@ -1322,6 +1369,7 @@ public:
         ThreeAd  instruction1 = ThreeAd("while", 'w', "", "");
         temp1->instructions.push_back(instruction1);
         con->convert(temp1);
+        temp1->fExit = trueB;
         out = temp1;
         return out;
     }
@@ -1387,6 +1435,7 @@ public:
         temp1->fExit = Continue;
         out->fExit = Continue;
         out = Continue;
+        return out;
 
     }
     void dump(int depth = 0)
@@ -1403,9 +1452,11 @@ class For : public Statement
 {
 public:
     Assignment *A;
+    Equal  *B;
     Expression *max, *increment;
     Statement *state;
     Lesseq *compare;
+    
     Add *i;
 
     For(Assignment *A, Expression *max, Expression *increment, Statement *state) : A(A), max(max), increment(increment), state(state) {}
@@ -1415,21 +1466,35 @@ public:
     BBlock *convert(BBlock *out)
     {
         // Write three address instructions into the block
-        ThreeAd instruction = ThreeAd("for", 'a', "", "");
-        out->instructions.push_back(instruction);
-        Lesseq *compare = new Lesseq(A->lhs, max);
+        
+        BBlock *trueB = new BBlock();
+        //BBlock *cont = new BBlock();
+        BBlock *exp = new BBlock();
+       
         Add *i = new Add(A->lhs, increment);
-        BBlock *cont = new BBlock;
+        out->tExit =exp;
+        string val =  max->convert(exp);
+        ThreeAd instruction = ThreeAd("If",' ',val , " ");       
+        //exp->instructions.push_back(ThreeAd("",' ',"",""));
+        //out->instructions.push_back(ThreeAd("",' ',"",""));
         A->convert(out);
-        max->convert(out);
-        BBlock *trueB = new BBlock;
-        BBlock *temp1 = trueB;
-        state->convert(trueB);
-        out->fExit = cont;
-        out-> tExit = trueB;
-        out = cont;
-        return out;
-
+        exp->instructions.push_back(instruction);
+        exp->tExit = trueB;
+        BBlock *temp = trueB;
+        auto val1 = state->convert(temp);
+        while(temp->tExit != NULL)
+        {
+            temp = temp->tExit;
+        }
+        BBlock *join = new BBlock();
+        exp->fExit = join;
+        i->convert(temp);
+        Equal *B = new Equal(A->lhs, i->name);
+        B->convert(temp);
+        ThreeAd instruction1 = ThreeAd("end",' '," " , " ");
+        temp->instructions.push_back(instruction1);
+        temp->tExit = exp;
+        return join;
     }
     void dump(int depth = 0)
     {
