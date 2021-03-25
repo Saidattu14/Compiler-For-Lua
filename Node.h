@@ -11,7 +11,6 @@
 #include "labtrees.cc"
 #
 using namespace std;
-static int id = 0;
 
 class Node
 {
