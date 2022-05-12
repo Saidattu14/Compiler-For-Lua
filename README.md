@@ -30,4 +30,7 @@ run make
 
 
 run ./test.lua the code of the lua language is converted into c program and presented in target.cc file
+./int test.lua for interpreter
+./comp test.lua for compiler
+
 
